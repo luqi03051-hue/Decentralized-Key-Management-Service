@@ -1,0 +1,65 @@
+# KC-ABE prototype: 1 PKG + 3 trusted high-level users, one independent container each.
+# - msk is mounted into `pkg` ONLY.
+# - sk / S_ID of each high-level user live only in that container's memory.
+# - containers talk over HTTP only; no shared volume carries secrets (mpk is public).
+# Image is built once with:  docker build -t kcabe:v1 .
+# (not built by compose: parallel builds of the same tag collide)
+x-app: &app
+  image: kcabe:v1
+
+services:
+  pkg:
+    <<: *app
+    command: python -m gunicorn -w 1 --threads 4 -b 0.0.0.0:5000 --timeout 120 pkg_server:app
+    cpus: 1.0
+    volumes:
+      - ./data/public:/data/public:ro
+      - ./data/pkg_secret:/secret:ro
+
+  hl1:
+    <<: *app
+    command: python -m gunicorn -w 1 --threads 4 -b 0.0.0.0:5000 --timeout 120 hl_server:app
+    cpus: 1.0
+    environment: { HL_ID: hl1, HL_ATTRS: "A,B,C,D,E", PKG_URL: "http://pkg:5000" }
+    volumes: [ "./data/public:/data/public:ro" ]
+    depends_on: [pkg]
+
+  hl2:
+    <<: *app
+    command: python -m gunicorn -w 1 --threads 4 -b 0.0.0.0:5000 --timeout 120 hl_server:app
+    cpus: 1.0
+    environment: { HL_ID: hl2, HL_ATTRS: "A,B,C,D,E", PKG_URL: "http://pkg:5000" }
+    volumes: [ "./data/public:/data/public:ro" ]
+    depends_on: [pkg]
+
+  hl3:
+    <<: *app
+    command: python -m gunicorn -w 1 --threads 4 -b 0.0.0.0:5000 --timeout 120 hl_server:app
+    cpus: 1.0
+    environment: { HL_ID: hl3, HL_ATTRS: "A,B,C,D,E", PKG_URL: "http://pkg:5000" }
+    volumes: [ "./data/public:/data/public:ro" ]
+    depends_on: [pkg]
+
+  hl4:
+    <<: *app
+    command: python -m gunicorn -w 1 --threads 4 -b 0.0.0.0:5000 --timeout 120 hl_server:app
+    cpus: 1.0
+    environment: { HL_ID: hl4, HL_ATTRS: "A,B,C,D,E", PKG_URL: "http://pkg:5000" }
+    volumes: [ "./data/public:/data/public:ro" ]
+    depends_on: [pkg]
+
+  hl5:
+    <<: *app
+    command: python -m gunicorn -w 1 --threads 4 -b 0.0.0.0:5000 --timeout 120 hl_server:app
+    cpus: 1.0
+    environment: { HL_ID: hl5, HL_ATTRS: "A,B,C,D,E", PKG_URL: "http://pkg:5000" }
+    volumes: [ "./data/public:/data/public:ro" ]
+    depends_on: [pkg]
+
+  client:                       # low-level users / experiment driver, started on demand
+    <<: *app
+    profiles: ["tools"]
+    command: python client.py
+    volumes:
+      - ./data/public:/data/public:ro
+      - ./results:/results
