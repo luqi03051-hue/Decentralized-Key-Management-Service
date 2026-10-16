@@ -18,47 +18,6 @@ In a conventional attribute-based encryption system, a **Private Key Generator (
 
 ### Before and after
 
-
-sequenceDiagram
-    autonumber
-    participant P as PKG / Security admin
-    participant A as Trusted Alice
-    participant B as Trusted Bob
-    participant C as Trusted Charlie
-    participant N as New employee
-
-    P->>A: Enrol Alice and issue private key
-    P->>B: Enrol Bob and issue private key
-    P->>C: Enrol Charlie and issue private key
-
-    Note over P: PKG may be unavailable after enrolment
-
-    N->>A: Request cooperative key
-    A-->>N: Cooperative key A
-
-    N->>B: Request cooperative key
-    B-->>N: Cooperative key B
-
-    N->>C: Request cooperative key
-    C-->>N: Cooperative key C
-
-    Note over N: Keys collected
-    Note over N: Decryption is not implemented in this prototype
-
-
-*Conceptual illustration. The trusted users issue separate cooperative keys; the diagram does not mean that they share their original PKG private keys.*
-
-##  Example: a company sharing confidential project files
-
-**Illustrative application scenario (not a deployed enterprise case study).**
-
-Suppose a company encrypts a project document for employees with the required attributes, such as `Engineering` and `Project-X`. The document's encryption policy also requires a minimum number of trusted contributors for cooperative decryption.
-
-1. **IT/security administrator (PKG)** initially issues private keys to trusted team members.
-2. **A new employee** is authorised for the project and selects a group of trusted colleagues.
-3. **Each trusted colleague** independently creates a cooperative key for that employee's permitted attributes.
-4. **The employee collects the keys.** In the full KC-ABE scheme, they can decrypt a matching ciphertext if their attributes satisfy its policy **and** the trusted group meets the ciphertext's minimum cooperation requirement.
-
 ```mermaid
 sequenceDiagram
   autonumber
@@ -79,6 +38,19 @@ sequenceDiagram
   C-->>N: Cooperative key C
   Note over N: Keys collected; actual decryption is not implemented in this prototype
 ```
+*Conceptual illustration. The trusted users issue separate cooperative keys; the diagram does not mean that they share their original PKG private keys.*
+
+##  Example: a company sharing confidential project files
+
+**Illustrative application scenario (not a deployed enterprise case study).**
+
+Suppose a company encrypts a project document for employees with the required attributes, such as `Engineering` and `Project-X`. The document's encryption policy also requires a minimum number of trusted contributors for cooperative decryption.
+
+1. **IT/security administrator (PKG)** initially issues private keys to trusted team members.
+2. **A new employee** is authorised for the project and selects a group of trusted colleagues.
+3. **Each trusted colleague** independently creates a cooperative key for that employee's permitted attributes.
+4. **The employee collects the keys.** In the full KC-ABE scheme, they can decrypt a matching ciphertext if their attributes satisfy its policy **and** the trusted group meets the ciphertext's minimum cooperation requirement.
+
 
 **Important:** The full research scheme has *two ways to decrypt*: directly with a PKG-issued key, or with a valid collection of cooperative keys. A cooperative group is not a way to bypass attribute-based access restrictions.
 
