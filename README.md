@@ -18,23 +18,33 @@ In a conventional attribute-based encryption system, a **Private Key Generator (
 
 ### Before and after
 
-```mermaid
-flowchart LR
-  subgraph BEFORE[Traditional key issuance]
-    P1[Central PKG] --> U1[Employee A]
-    P1 --> U2[Employee B]
-    P1 --> U3[Employee C]
-    P1 --> U4[Many more employees]
-  end
-  subgraph AFTER[Cooperative key issuance]
-    P2[Central PKG] --> T1[Trusted user 1]
-    P2 --> T2[Trusted user 2]
-    P2 --> T3[Trusted user 3]
-    T1 --> E[New employee]
-    T2 --> E
-    T3 --> E
-  end
-```
+
+sequenceDiagram
+    autonumber
+    participant P as PKG / Security admin
+    participant A as Trusted Alice
+    participant B as Trusted Bob
+    participant C as Trusted Charlie
+    participant N as New employee
+
+    P->>A: Enrol Alice and issue private key
+    P->>B: Enrol Bob and issue private key
+    P->>C: Enrol Charlie and issue private key
+
+    Note over P: PKG may be unavailable after enrolment
+
+    N->>A: Request cooperative key
+    A-->>N: Cooperative key A
+
+    N->>B: Request cooperative key
+    B-->>N: Cooperative key B
+
+    N->>C: Request cooperative key
+    C-->>N: Cooperative key C
+
+    Note over N: Keys collected
+    Note over N: Decryption is not implemented in this prototype
+
 
 *Conceptual illustration. The trusted users issue separate cooperative keys; the diagram does not mean that they share their original PKG private keys.*
 
