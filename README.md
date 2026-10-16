@@ -1,4 +1,4 @@
-# Decentralised Key Management with KC-ABE 
+# Decentralised Key Management with KC-ABE 🔐
 
 **What if a company didn't need to contact one central server every time someone needed an encryption key?**
 
@@ -8,7 +8,7 @@ This project explores that question with **Key Cooperative Attribute-Based Encry
 
 > **Research prototype, not a production security product.** This repository demonstrates **key setup and cooperative key issuance**. Full encryption and decryption (`Enc`, `PDec`, `UDec`) are described in the [research paper](#research-background) but **not implemented in this repository**.
 
-##  The problem, in plain English
+## 💡 The problem, in plain English
 
 Imagine a company with hundreds of employees accessing protected documents. Each employee needs a cryptographic key tied to their permitted attributes (for example, their department).
 
@@ -18,29 +18,11 @@ In a conventional attribute-based encryption system, a **Private Key Generator (
 
 ### Before and after
 
-```mermaid
-sequenceDiagram
-  autonumber
-  participant P as PKG / Security admin
-  participant A as Trusted Alice
-  participant B as Trusted Bob
-  participant C as Trusted Charlie
-  participant N as New employee
-  P->>A: Enrol Alice; issue private key
-  P->>B: Enrol Bob; issue private key
-  P->>C: Enrol Charlie; issue private key
-  Note over P: PKG may be unavailable after enrolment
-  N->>A: Request cooperative key (attributes, group)
-  A-->>N: Cooperative key A
-  N->>B: Request cooperative key
-  B-->>N: Cooperative key B
-  N->>C: Request cooperative key
-  C-->>N: Cooperative key C
-  Note over N: Keys collected; actual decryption is not implemented in this prototype
-```
+![Traditional vs cooperative key issuance](docs/images/problem.png)
+
 *Conceptual illustration. The trusted users issue separate cooperative keys; the diagram does not mean that they share their original PKG private keys.*
 
-##  Example: a company sharing confidential project files
+## 🏢 Example: a company sharing confidential project files
 
 **Illustrative application scenario (not a deployed enterprise case study).**
 
@@ -51,33 +33,23 @@ Suppose a company encrypts a project document for employees with the required at
 3. **Each trusted colleague** independently creates a cooperative key for that employee's permitted attributes.
 4. **The employee collects the keys.** In the full KC-ABE scheme, they can decrypt a matching ciphertext if their attributes satisfy its policy **and** the trusted group meets the ciphertext's minimum cooperation requirement.
 
+![Illustrative enterprise document-sharing scenario](docs/images/real-world-scenario.png)
+
+![Four-step cooperative key issuance](docs/images/kcabe-workflow.png)
 
 **Important:** The full research scheme has *two ways to decrypt*: directly with a PKG-issued key, or with a valid collection of cooperative keys. A cooperative group is not a way to bypass attribute-based access restrictions.
 
-##  What this repository actually runs
+## 🧩 What this repository actually runs
 
 The code provides a containerised demonstration of the **key-issuance path**:
 
-```mermaid
-flowchart TB
-  SETUP[setup_once.py\nGenerate public and secret parameters]
-  PKG[pkg_server.py\nPKG enrolment API]
-  H1[hl_server.py\nTrusted user 1]
-  H2[hl_server.py\nTrusted user 2]
-  H3[hl_server.py\nTrusted user 3]
-  CLIENT[client.py\nRequest cooperative keys]
-  SETUP --> PKG
-  PKG -->|Initial enrolment| H1
-  PKG -->|Initial enrolment| H2
-  PKG -->|Initial enrolment| H3
-  H1 -->|Cooperative key| CLIENT
-  H2 -->|Cooperative key| CLIENT
-  H3 -->|Cooperative key| CLIENT
-```
+![Docker prototype architecture](docs/images/system-architecture.png)
 
 The Docker Compose setup provides **one PKG container, five trusted-user containers, and an on-demand client**. Each trusted user generates a response independently; no peer-to-peer message exchange is needed during the key request. The PKG retains master secrets, so this is **workload decentralisation, not elimination of central trust or key escrow**.
 
-##  What did the experiment show?
+## 📊 What did the experiment show?
+
+![PKG request comparison](docs/images/experiment-results.png)
 
 We compared conventional PKG-only issuance with cooperative issuance for a **100-user experiment**, repeated three times. In the cooperative case, the PKG enrolled **5 trusted users** and the other **95 users** each requested keys from **3 trusted users**.
 
@@ -91,7 +63,7 @@ We compared conventional PKG-only issuance with cooperative issuance for a **100
 
 See [`results/summary.md`](results/summary.md) for the full numbers and methodology.
 
-##  Try it locally
+## 🚀 Try it locally
 
 **Prerequisites:** Docker and Docker Compose, plus a Docker base image with Charm-Crypto, PBC, GMP, Flask, HTTPX and Gunicorn. **Important:** the current `Dockerfile` starts from `abe-lambda_backup:pv4`, a locally built image **not included** in this repository. Replace/provide that base image before the commands below will work on a new machine.
 
@@ -118,7 +90,7 @@ docker compose run --rm client
 
 **On Windows:** these shell commands assume a Bash-compatible shell; adjust the bind-mount syntax for your Docker/PowerShell setup. The full experiment can be run with `./run_all.sh` in Bash.
 
-##  Technology and code map
+## 🛠️ Technology and code map
 
 | Component | Purpose |
 |---|---|
@@ -130,7 +102,7 @@ docker compose run --rm client
 | `docker-compose.yml` | Runs the multi-node demo |
 | `run_experiment.py`, `run_all.sh`, `summarize.py` | Runs and summarises performance tests |
 
-##  Where could this idea be useful?
+## 🌍 Where could this idea be useful?
 
 These are **potential applications of the research**, not claims that this repository is production-ready:
 
@@ -140,7 +112,7 @@ These are **potential applications of the research**, not claims that this repos
 
 In a real deployment, identity verification, trustworthy attribute assignment, TLS, trusted-user availability, key recovery and revocation would need to be addressed.
 
-##  Limitations and security notes
+## 🔒 Limitations and security notes
 
 - This repository **does not implement encryption or decryption**; receiving well-formed cooperative keys is **not** a decryption-correctness test.
 - The PKG still holds master secrets and must be available to enrol new trusted users.
@@ -149,7 +121,7 @@ In a real deployment, identity verification, trustworthy attribute assignment, T
 - The pairing-based SS512 setup is for research experimentation; **it is not post-quantum secure**.
 - Do **not** commit `data/pkg_secret/msk.json`, other generated secret keys, or local credentials. Keep generated `data/` out of Git.
 
-##  Research background
+## 📄 Research background
 
 This prototype is based on:
 
